@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi horario UNACH</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1c7ed6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Horario">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#6b7480;--bd:#dde1e6;--grid:#eceff2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171a;--card:#1d2125;--tx:#e8eaed;--mu:#9aa3ad;--bd:#2f353b;--grid:#272c31}}
+:root[data-theme="dark"]{--bg:#14171a;--card:#1d2125;--tx:#e8eaed;--mu:#9aa3ad;--bd:#2f353b;--grid:#272c31}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:12px;display:grid;gap:12px}
+@media(min-width:900px){.wrap{grid-template-columns:320px 1fr;align-items:start}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}
+h1{font-size:18px;margin:0 0 8px}h2{font-size:15px;margin:0 0 8px}
+label{display:block;font-size:12px;color:var(--mu);margin-top:8px}
+input,select,button{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:7px 9px;width:100%}
+button{cursor:pointer;width:auto}
+button.p{background:#1c7ed6;color:#fff;border-color:#1c7ed6;width:100%;margin-top:10px;font-weight:600}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.bar{display:flex;align-items:center;gap:8px;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap}
+.cal{overflow-x:auto}
+.grid{display:grid;grid-template-columns:42px repeat(7,minmax(92px,1fr));min-width:700px}
+.hd{text-align:center;font-size:12px;padding:4px 0;border-bottom:1px solid var(--bd);font-weight:600}
+.hd.t{color:#1c7ed6}
+.hrs div{height:40px;font-size:10px;color:var(--mu);text-align:right;padding-right:4px;transform:translateY(-6px)}
+.col{position:relative;border-left:1px solid var(--grid);background-image:linear-gradient(var(--grid) 1px,transparent 1px);background-size:100% 40px}
+.ev{position:absolute;left:2px;right:2px;border-radius:6px;padding:2px 4px;font-size:10.5px;line-height:1.2;overflow:hidden;color:#fff}
+.ev.b{background:#7b8591!important;opacity:.85}
+.ev.k{border:2px dashed rgba(255,255,255,.85);color:#fff;font-weight:600}
+.leg{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;margin-top:8px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.task{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--grid)}
+.task input{width:auto}.task .i{flex:1;min-width:0}.task small{color:var(--mu);display:block}
+.task.d .i{opacity:.45;text-decoration:line-through}.od{color:#e03131!important}
+.x{background:none;border:none;color:var(--mu);padding:2px 6px}
+.warn{background:#fff3bf;color:#5c4400;border-radius:8px;padding:6px 8px;margin-top:8px;font-size:12px}
+details summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div>
+ <div class="card">
+  <h1>📚 Nueva tarea</h1>
+  <label>Título</label><input id="tt" placeholder="Ej: Deber 1 – Mapeo de procesos">
+  <label>Materia</label><select id="ts"></select>
+  <div class="row"><div><label>Entrega</label><input id="td" type="date"></div><div><label>Horas estimadas</label><select id="th"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>6</option><option>8</option></select></div></div>
+  <button class="p" id="add">Agregar y ubicar en el calendario</button>
+  <div id="warn"></div>
+ </div>
+ <div class="card" style="margin-top:12px"><h2>Tareas pendientes</h2><div id="tl"></div></div>
+ <div class="card" style="margin-top:12px"><details><summary>⚙️ Rutina y límites</summary>
+  <div class="row"><div><label>🏃 Ejercicio (30 min)</label><input type="time" id="s_ex"></div><div><label>🚿 Baño (30 min)</label><input type="time" id="s_ba"></div></div>
+  <label>🏃 Días de ejercicio (4 por semana)</label><div id="exd"></div>
+  <div class="row"><div><label>📱 Pendientes teléfono</label><input type="time" id="s_ph"></div><div><label>Máx. horas de estudio/día</label><input type="number" id="s_cap" min="1" max="8"></div></div>
+  <div class="row"><div><label>Estudiar desde</label><input type="time" id="s_ws"></div><div><label>Hasta</label><input type="time" id="s_we"></div></div>
+  <div class="row"><div><label>Anticipación máx. (días)</label><input type="number" id="s_ad" min="1" max="60"></div></div>
+  <p style="font-size:12px;color:var(--mu)">Fines de semana se estudia desde las 09:00. Los cambios se aplican al instante.</p>
+ </details></div>
+</div>
+<div class="card">
+ <div class="bar"><h1 style="margin:0">Semana</h1>
+  <div class="row" style="flex:none"><button id="pv">◀</button><button id="tn">Hoy</button><button id="nx">▶</button></div></div>
+ <div id="rng" style="font-size:12px;color:var(--mu);margin-bottom:6px"></div>
+ <div class="cal"><div class="grid" id="g"></div></div>
+ <div class="leg" id="lg"></div>
+</div>
+</div>
+<script>
+const SUBJ={"Administración de la Producción":"#e8590c","Gestión de la Calidad":"#2f9e44","Ingeniería de Métodos II":"#1c7ed6","Ergonomía":"#ae3ec9","Procesos Industriales I":"#d6336c","Seguridad Industrial":"#e67700","Inglés B1":"#0ca678","Otra":"#495057"};
+const A="Administración de la Producción",G="Gestión de la Calidad",M="Ingeniería de Métodos II",E="Ergonomía",P="Procesos Industriales I",S="Seguridad Industrial",I="Inglés B1";
+// [día(1=lun), materia, inicio, fin]
+const CL=[[1,A,7,9],[1,G,9,11],[1,M,11,13],[1,I,14,16],[2,E,7,9],[2,P,9,11],[2,S,11,13],[2,I,18,20],
+[3,P,7,9],[3,M,9,11],[3,A,11,13],[4,G,7,9],[4,S,9,11],[4,E,11,13],[5,M,7,9],[5,P,9,11],[5,S,11,13],[5,I,14,16]];
+const DEF={exd:[1,2,4,5],ex:"19:30",ba:"20:00",ph:"13:30",cap:3,ws:"14:00",we:"22:00",ad:14};
+const T0=(id,t,d,h)=>({id,title:t,subj:G,due:d,hours:h,done:false});
+const SEED=[T0(1,"Deber 1: Mapeo de procesos","2026-10-26",3),T0(2,"Evaluación 1 (Unidad 1)","2026-11-09",4),T0(3,"Deber 2: Diseño y modelado","2026-11-09",3),
+T0(4,"Evaluación 2 (Unidad 2, parte 1)","2026-11-23",4),T0(5,"Deber 3: Unidad 2 (parte 1)","2026-11-23",3)];
+let st={tasks:SEED,set:DEF};
+try{const r=localStorage.getItem("unach-plan");if(r){const o=JSON.parse(r);st={tasks:o.tasks||[],set:Object.assign({},DEF,o.set)}}}catch(e){}
+if(st.set.de){delete st.set.de;if(st.set.ba==="06:30")st.set.ba=DEF.ba}
+const save=()=>{try{localStorage.setItem("unach-plan",JSON.stringify(st))}catch(e){}};
+const $=id=>document.getElementById(id);
+const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const pd=s=>{const[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c)};
+const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const hm=s=>{const[a,b]=s.split(":").map(Number);return a*2+(b>=30?1:0)}; // índice de media hora
+const fmt=i=>String(Math.floor(i/2)).padStart(2,"0")+":"+(i%2?"30":"00");
+const DN=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+let ws=(()=>{const t=new Date();t.setHours(0,0,0,0);return addD(t,-((t.getDay()+6)%7))})();
+
+function fixed(d){ // bloques fijos del día: clases + rutina
+  const dow=d.getDay(),s=st.set,ev=[];
+  CL.forEach(c=>{if(c[0]===dow)ev.push({a:c[2]*2,b:c[3]*2,t:c[1],c:SUBJ[c[1]],k:"c"})});
+  [["ex","🏃 Ejercicio"],["ba","🚿 Baño"],["ph","📱 Pendientes teléfono"]].forEach(([k,n])=>{if(k==="ex"&&!s.exd.includes(dow))return;const a=hm(s[k]);ev.push({a,b:a+1,t:n,k:"b"})});
+  return ev;
+}
+function plan(){
+  const out={},load={},now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()),s=st.set;
+  const occ={},get=k=>{if(!occ[k]){const a=new Array(48).fill(0);fixed(pd(k)).forEach(e=>{for(let i=e.a;i<e.b;i++)a[i]=1});occ[k]=a}return occ[k]};
+  let miss=[];
+  const list=st.tasks.filter(t=>!t.done&&t.due).sort((a,b)=>a.due<b.due?-1:1);
+  list.forEach(t=>{
+    const due=pd(t.due);if(due<today)return;
+    let from=addD(due,-s.ad);if(from<today)from=today;
+    let to=addD(due,-1);if(to<from)to=due;
+    const days=[];for(let d=new Date(from);d<=to;d=addD(d,1))days.push(ymd(d));
+    let rem=Math.ceil(t.hours*2),guard=0;
+    while(rem>0&&guard++<400){
+      const len=Math.min(2,rem);let done=false;
+      const cand=days.slice().sort((x,y)=>((load[x]||0)-(load[y]||0))||(x<y?-1:1));
+      for(const k of cand){
+        if((load[k]||0)>=s.cap*2)continue;
+        const d=pd(k),wk=d.getDay()===0||d.getDay()===6;
+        let a0=wk?18:hm(s.ws),b0=hm(s.we);
+        if(k===ymd(now))a0=Math.max(a0,Math.ceil((now.getHours()*60+now.getMinutes())/30)+1);
+        const o=get(k);
+        for(let i=a0;i+len<=b0;i++){
+          let ok=true;for(let j=0;j<len;j++)if(o[i+j]){ok=false;break}
+          if(ok){for(let j=0;j<len;j++)o[i+j]=1;(out[k]=out[k]||[]).push({a:i,b:i+len,t:"📝 "+t.title,c:SUBJ[t.subj]||SUBJ.Otra,k:"k",id:t.id});load[k]=(load[k]||0)+len;done=true;break}
+        }
+        if(done)break;
+      }
+      if(!done){miss.push(t.title);break}
+      rem-=len;
+    }
+  });
+  return{out,miss};
+}
+function render(){
+  const{out,miss}=plan(),g=$("g"),tk=ymd(new Date());
+  let h='<div></div>';
+  for(let i=0;i<7;i++){const d=addD(ws,i);h+=`<div class="hd ${ymd(d)===tk?"t":""}">${DN[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}</div>`}
+  h+='<div class="hrs">';for(let x=6;x<23;x++)h+=`<div>${x}:00</div>`;h+="</div>";
+  for(let i=0;i<7;i++){
+    const d=addD(ws,i),k=ymd(d),evs=fixed(d).concat(out[k]||[]);
+    h+='<div class="col" style="height:680px">'+evs.filter(e=>e.b>12&&e.a<46).map(e=>{
+      const top=(e.a-12)*20,ht=(e.b-e.a)*20-1;
+      return `<div class="ev ${e.k}" style="top:${top}px;height:${ht}px;${e.c?"background:"+e.c:""}" title="${e.t} ${fmt(e.a)}–${fmt(e.b)}">${e.t}<br>${fmt(e.a)}</div>`}).join("")+"</div>";
+  }
+  g.innerHTML=h;
+  const e=addD(ws,6);$("rng").textContent=ws.getDate()+"/"+(ws.getMonth()+1)+"/"+ws.getFullYear()+" – "+e.getDate()+"/"+(e.getMonth()+1)+"/"+e.getFullYear();
+  $("lg").innerHTML=Object.keys(SUBJ).map(n=>`<span><i class="dot" style="background:${SUBJ[n]}"></i>${n}</span>`).join("")+'<span><i class="dot" style="background:#7b8591"></i>Rutina diaria</span><span>▭ Borde punteado = tarea ubicada</span>';
+  $("warn").innerHTML=miss.length?`<div class="warn">⚠️ Sin espacio suficiente para: ${[...new Set(miss)].join(", ")}. Sube el límite diario o amplía el horario de estudio.</div>`:"";
+  const td=new Date();td.setHours(0,0,0,0);
+  $("tl").innerHTML=st.tasks.length?st.tasks.slice().sort((a,b)=>a.done-b.done||(a.due<b.due?-1:1)).map(t=>{
+    const od=!t.done&&pd(t.due)<td,n=Object.values(out).flat().filter(x=>x.id===t.id).length/2;
+    return `<div class="task ${t.done?"d":""}"><input type="checkbox" ${t.done?"checked":""} data-c="${t.id}"><i class="dot" style="background:${SUBJ[t.subj]||SUBJ.Otra}"></i><div class="i"><b>${t.title.replace(/</g,"&lt;")}</b><small class="${od?"od":""}">${t.subj} · entrega ${t.due}${od?" (vencida)":""} · ${t.hours} h${t.done?"":" · "+n+" h planificadas"}</small></div><button class="x" data-x="${t.id}">✕</button></div>`}).join(""):'<small style="color:var(--mu)">Sin tareas todavía.</small>';
+}
+$("ts").innerHTML=Object.keys(SUBJ).map(n=>`<option>${n}</option>`).join("");
+$("td").value=ymd(addD(new Date(),7));
+$("add").onclick=()=>{
+  const t=$("tt").value.trim(),d=$("td").value;if(!t||!d){$("tt").focus();return}
+  st.tasks.push({id:Date.now(),title:t,subj:$("ts").value,due:d,hours:+$("th").value,done:false});
+  $("tt").value="";save();render();
+};
+$("tl").onclick=e=>{
+  const c=e.target.dataset.c,x=e.target.dataset.x;
+  if(c){const t=st.tasks.find(t=>t.id==c);t.done=!t.done}
+  else if(x)st.tasks=st.tasks.filter(t=>t.id!=x);else return;
+  save();render();
+};
+$("pv").onclick=()=>{ws=addD(ws,-7);render()};
+$("nx").onclick=()=>{ws=addD(ws,7);render()};
+$("tn").onclick=()=>{const t=new Date();t.setHours(0,0,0,0);ws=addD(t,-((t.getDay()+6)%7));render()};
+["ex","ba","ph","cap","ws","we","ad"].forEach(k=>{
+  const el=$("s_"+k);el.value=st.set[k];
+  el.onchange=()=>{if(!el.value)return;st.set[k]=el.type==="number"?+el.value:el.value;save();render()};
+});
+$("exd").innerHTML=[1,2,3,4,5,6,0].map(d=>`<label style="display:inline-flex;gap:3px;margin:4px 8px 0 0;color:var(--tx)"><input type="checkbox" style="width:auto" value="${d}" ${st.set.exd.includes(d)?"checked":""}>${DN[d]}</label>`).join("");
+$("exd").onchange=()=>{st.set.exd=[...$("exd").querySelectorAll("input:checked")].map(i=>+i.value);save();render()};
+render();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
